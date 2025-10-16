@@ -83,21 +83,21 @@ class ConfigManager:
             config: 配置字典
         """
         env_content = f"""# LLM API Configuration
-LLM_API_KEY={config.get('llm_api_key', '')}
-OPENAI_BASE_URL={config.get('openai_base_url', '')}
-
-# Default Model Configuration
-DEFAULT_MODEL={config.get('default_model', 'claude-sonnet-4-20250514')}
-
-# Jina API Configuration
-JINA_API_KEY={config.get('jina_api_key', '')}
-
-# Tavily API Configuration
-TAVILY_API_KEY={config.get('tavily_api_key', '')}
-
-# XHS MCP Service Configuration
-XHS_MCP_URL={config.get('xhs_mcp_url', '')}
-"""
+            LLM_API_KEY={config.get('llm_api_key', '')}
+            OPENAI_BASE_URL={config.get('openai_base_url', '')}
+            
+            # Default Model Configuration
+            DEFAULT_MODEL={config.get('default_model', 'claude-sonnet-4-20250514')}
+            
+            # Jina API Configuration
+            JINA_API_KEY={config.get('jina_api_key', '')}
+            
+            # Tavily API Configuration
+            TAVILY_API_KEY={config.get('tavily_api_key', '')}
+            
+            # XHS MCP Service Configuration
+            XHS_MCP_URL={config.get('xhs_mcp_url', '')}
+            """
         with open(self.env_file, 'w', encoding='utf-8') as f:
             f.write(env_content)
 
