@@ -1,144 +1,149 @@
-# 小红书内容自动生成与发布系统
+# Xiaohongshu AI Content Generation & Publishing System
 
-一个基于AI的智能小红书内容生成和自动发布Web应用，通过MCP（Model Context Protocol）集成多种工具服务，
-实现从主题输入到内容发布的全自动化流程。
+[中文](README.md) | English
 
-简单来说：输入一个主题所有 AI 帮你搞定，直接发布到你的小红书账号上
+An AI-powered intelligent Xiaohongshu (Little Red Book) content generation and automatic publishing web application. It integrates multiple tool services through MCP (Model Context Protocol) to achieve a fully automated workflow from topic input to content publishing.
+
+**In simple terms: Input a topic, and AI handles everything for you, publishing directly to your Xiaohongshu account**
 
 ![img.png](pages/img.png)
 
 
-## ✨ 功能特点
+## ✨ Features
 
-- 🎨 **现代化Web界面** - 简洁美观的左右分栏布局，响应式设计
-- ⚙️ **配置管理** - 所有配置通过Web界面输入，自动保存到配置文件
-- 🔌 **MCP服务集成** - 集成Jina搜索、Tavily搜索、小红书发布三大MCP服务
-- 🤖 **智能内容生成** - 基于用户主题自动检索资料、分析整理、撰写文章
-- 📝 **自动格式化** - 自动适配小红书发布格式（标题、正文、标签、配图）
-- 🚀 **一键发布** - 生成完成后自动发布到小红书平台
-- 📊 **实时进度** - 显示执行进度和状态信息
-- ✅ **结果展示** - 展示最终发布的标题、内容、标签、配图等信息
+- 🎨 **Modern Web Interface** - Clean and beautiful left-right panel layout with responsive design
+- ⚙️ **Configuration Management** - All configurations input through web interface, automatically saved to config files
+- 🔌 **MCP Service Integration** - Integrates three major MCP services: Jina Search, Tavily Search, and Xiaohongshu Publishing
+- 🤖 **Intelligent Content Generation** - Automatically retrieves information, analyzes, and writes articles based on user topics
+- 📝 **Auto Formatting** - Automatically adapts to Xiaohongshu publishing format (title, content, tags, images)
+- 🚀 **One-Click Publishing** - Automatically publishes to Xiaohongshu platform after generation
+- 📊 **Real-time Progress** - Displays execution progress and status information
+- ✅ **Result Display** - Shows final published title, content, tags, images, etc.
 
-**打个广告**
+**A Quick Ad**
 
-这是我自己运营的账号，全部由这个项目写出来的文章
+This is my personal account, all articles are written by this project
 
 ![img_1.png](pages/img_1.png)
 
-[个人主页](https://www.xiaohongshu.com/user/profile/60857eed0000000001008826)欢迎查看，点点关注，带你获取一手的 AI 资源
+[Personal Homepage](https://www.xiaohongshu.com/user/profile/60857eed0000000001008826) - Welcome to visit, follow me for first-hand AI resources
 
 
-## 📋 前置要求
+## 📋 Prerequisites
 
-### 1. 启动小红书MCP服务
+### 1. Start Xiaohongshu MCP Service
 
-**必须先启动 [xiaohongshu-mcp](https://github.com/xpzouying/xiaohongshu-mcp) 服务**
+**You must first start the [xiaohongshu-mcp](https://github.com/xpzouying/xiaohongshu-mcp) service**
 
 
 ```bash
-# 1. 克隆小红书MCP项目
+# 1. Clone the Xiaohongshu MCP project
 git clone https://github.com/xpzouying/xiaohongshu-mcp.git
 cd xiaohongshu-mcp
 
-# 2. 按照项目README的说明启动服务
-# 默认服务地址: http://localhost:18060/mcp
+# 2. Start the service following the project README instructions
+# Default service address: http://localhost:18060/mcp
 ```
-⚠️注意：要先登录自己的小红书账号（按照这个 mcp 服务里面的方式来进行登录）
-### 2. 系统环境
+⚠️Note: You need to log in to your Xiaohongshu account first (follow the login method in the MCP service)
+
+### 2. System Environment
 
 - Python 3.8+
-- Node.js 16+ (用于MCP工具)
-- npm/npx (用于运行MCP工具)
+- Node.js 16+ (for MCP tools)
+- npm/npx (for running MCP tools)
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 1. 安装依赖
+### 1. Install Dependencies
 
 ```bash
 cd xhs_web_app
 pip install -r requirements.txt
 ```
 
-### 2. 启动应用
+### 2. Start Application
 
 ```bash
 python app.py
 ```
 
-应用默认在 `http://localhost:8080` 启动。
+The application starts by default at `http://localhost:8080`.
 
-### 3. 配置系统
+### 3. Configure System
 
-访问 `http://localhost:8080`，在左侧面板配置以下信息：
+Visit `http://localhost:8080` and configure the following information in the left panel:
 
-#### 必填配置
+#### Required Configuration
 
-| 配置项 | 说明 | 示例 |
-|--------|------|------|
-| **LLM API Key** | OpenAI兼容的API密钥 | `sk-xxx...` |
-| **OpenAI Base URL** | API基础地址 | `https://api.openai.com/v1` 或 `https://usw.sealos.io/v1` |
-| **默认模型** | 使用的LLM模型 | `claude-sonnet-4-20250514` (推荐) |
-| **小红书MCP服务地址** | MCP服务的URL | `http://localhost:18060/mcp` |
+| Configuration | Description | Example |
+|---------------|-------------|---------|
+| **LLM API Key** | OpenAI-compatible API key | `sk-xxx...` |
+| **OpenAI Base URL** | API base address | `https://api.openai.com/v1` or `https://usw.sealos.io/v1` |
+| **Default Model** | LLM model to use | `claude-sonnet-4-20250514` (recommended) |
+| **Xiaohongshu MCP Service URL** | MCP service URL | `http://localhost:18060/mcp` |
 
-#### 可选配置
+#### Optional Configuration
 
-| 配置项 | 说明 | 获取方式 |
-|--------|------|----------|
-| **Jina API Key** | Jina搜索服务密钥 | [Jina官网](https://jina.ai/) |
-| **Tavily API Key** | Tavily搜索服务密钥 | [Tavily官网](https://tavily.com/) |
+| Configuration | Description | How to Get |
+|---------------|-------------|------------|
+| **Jina API Key** | Jina search service key | [Jina Official Site](https://jina.ai/) |
+| **Tavily API Key** | Tavily search service key | [Tavily Official Site](https://tavily.com/) |
 
-推荐使用 Tavily 作为搜索工具，每个月能白嫖 1000 次搜索请求
+Recommend using Tavily as the search tool, which offers 1000 free search requests per month
 
-> 💡 **提示**: 点击配置项旁边的"获取密钥"或"查看文档"链接可直接跳转到对应的服务网站。
+> 💡 **Tip**: Click the "Get Key" or "View Documentation" links next to configuration items to jump directly to the corresponding service websites.
 
 
-### 4. 生成内容
+### 4. Generate Content
 
-1. 在"内容生成与发布"区域输入主题
-2. 点击"🚀 开始生成并发布"按钮
-3. 在右侧查看执行进度和最终结果
+1. Input a topic in the "Content Generation & Publishing" area
+2. Click the "🚀 Start Generation & Publishing" button
+3. View execution progress and final results on the right side
 
-#### 主题示例
+#### Topic Examples
 
-- "DeepSeek R1 最新技术解析"
-- "Claude 3.5 Sonnet 使用体验"
-- "2025年AI发展趋势预测"
-- "Transformer架构详解"
+- "ByteDance's Doubao Model: Daily API calls exceed 30 trillion tokens, with impressive growth!"
+![img.png](pages/img2.png)
+- "Claude 3.5 Sonnet User Experience"
+- "AI Development Trends Prediction for 2025"
+- "Transformer Architecture Explained"
+![img.png](pages/img_3.png)
 
-## 📂 项目结构
+
+## 📂 Project Structure
 
 ```
 xhs_web_app/
-├── app.py                      # FastAPI主程序
-├── requirements.txt            # Python依赖
-├── README.md                   # 本文档
+├── app.py                      # FastAPI main program
+├── requirements.txt            # Python dependencies
+├── README.md                   # This document
 │
-├── config/                     # 配置模块
+├── config/                     # Configuration module
 │   ├── __init__.py
-│   ├── config_manager.py       # 配置管理器
-│   ├── app_config.json         # 应用配置（自动生成）
-│   ├── servers_config.json     # MCP服务配置（自动生成）
-│   └── .env                    # 环境变量（自动生成）
+│   ├── config_manager.py       # Configuration manager
+│   ├── app_config.json         # App config (auto-generated)
+│   ├── servers_config.json     # MCP server config (auto-generated)
+│   └── .env                    # Environment variables (auto-generated)
 │
-├── core/                       # 核心功能模块
+├── core/                       # Core functionality module
 │   ├── __init__.py
-│   └── content_generator.py    # 内容生成器（基于MCP工具执行）
+│   └── content_generator.py    # Content generator (based on MCP tool execution)
 │
-├── static/                     # 静态资源
+├── static/                     # Static resources
 │   ├── css/
-│   │   └── style.css          # 样式文件
+│   │   └── style.css          # Style file
 │   └── js/
-│       └── app.js             # 前端交互逻辑
+│       └── app.js             # Frontend interaction logic
 │
-└── templates/                  # HTML模板
-    └── index.html             # 主页面
+└── templates/                  # HTML templates
+    └── index.html             # Main page
 ```
 
-## 🔧 配置文件说明
+## 🔧 Configuration File Description
 
 ### 1. app_config.json
 
-存储应用的主要配置信息：
+Stores main application configuration:
 
 ```json
 {
@@ -153,7 +158,7 @@ xhs_web_app/
 
 ### 2. servers_config.json
 
-MCP服务器配置（根据app_config.json自动生成）：
+MCP server configuration (auto-generated based on app_config.json):
 
 ```json
 {
@@ -177,97 +182,198 @@ MCP服务器配置（根据app_config.json自动生成）：
 }
 ```
 
-## 🎯 内容生成流程
+## 🎯 Content Generation Process
 
-系统采用4步骤流程自动生成并发布内容：
+The system uses a 4-step workflow to automatically generate and publish content:
 
-### Step 1: 信息检索
-- 使用Jina或Tavily搜索工具
-- 检索最新7-30天内的相关信息
-- 收集5-8条高质量资料
-- 获取3-4张相关图片
+### Step 1: Information Retrieval
+- Uses Jina or Tavily search tools
+- Retrieves latest information from the past 7-30 days
+- Collects 5-8 high-quality resources
+- Obtains 3-4 related images
 
-### Step 2: 撰写文章
-- 基于收集的资料撰写专业文章
-- 标题控制在20字以内
-- 正文800-1200字
-- 使用年轻化、活泼的语言风格
-- 适当添加emoji增加趣味性
+### Step 2: Article Writing
+- Writes professional articles based on collected materials
+- Title limited to 20 characters
+- Content 800-1200 words
+- Uses youthful and lively language style
+- Appropriately adds emojis for engagement
 
-### Step 3: 格式适配
-- 调整为小红书专用格式
-- 移除#标签，改为自然语言
-- 提取5个精准话题标签
-- 验证图片链接有效性
-- 生成标准JSON格式
+### Step 3: Format Adaptation
+- Adjusts to Xiaohongshu-specific format
+- Removes # tags, converts to natural language
+- Extracts 5 precise topic tags
+- Validates image link availability
+- Generates standard JSON format
 
-### Step 4: 自动发布
-- 调用小红书MCP服务
-- 发布内容到小红书平台
-- 返回发布结果
-- **检测到发布成功后自动停止迭代**
+### Step 4: Auto Publishing
+- Calls Xiaohongshu MCP service
+- Publishes content to Xiaohongshu platform
+- Returns publishing results
+- **Automatically stops iteration upon successful publishing**
 
-## 🌐 API端点
+## 🌐 API Endpoints
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/` | 主页面 |
-| GET | `/api/config` | 获取配置（隐藏敏感信息） |
-| POST | `/api/config` | 保存配置 |
-| POST | `/api/test-login` | 测试小红书MCP连接 |
-| POST | `/api/generate-and-publish` | 生成并发布内容 |
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/` | Main page |
+| GET | `/api/config` | Get configuration (hides sensitive info) |
+| POST | `/api/config` | Save configuration |
+| POST | `/api/test-login` | Test Xiaohongshu MCP connection |
+| POST | `/api/generate-and-publish` | Generate and publish content |
 
-## 🛠️ 技术栈
+## 🛠️ Tech Stack
 
-### 后端
-- **FastAPI** - 现代化Web框架
-- **MCP (Model Context Protocol)** - 工具服务集成
-- **OpenAI SDK** - LLM API调用
-- **aiohttp** - 异步HTTP客户端
+### Backend
+- **FastAPI** - Modern web framework
+- **MCP (Model Context Protocol)** - Tool service integration
+- **OpenAI SDK** - LLM API calls
+- **aiohttp** - Async HTTP client
 
-### 前端
-- **原生HTML/CSS/JavaScript** - 轻量级，无需构建
-- **Element UI 风格** - 简洁美观的UI设计
-- **响应式布局** - 支持桌面和移动端
+### Frontend
+- **Native HTML/CSS/JavaScript** - Lightweight, no build required
+- **Element UI Style** - Clean and beautiful UI design
+- **Responsive Layout** - Supports desktop and mobile
 
-### MCP工具服务
-- **Jina MCP Tools** - 网络搜索和内容抓取
-- **Tavily Remote** - 深度网络搜索
-- **XHS MCP** - 小红书内容发布
+### MCP Tool Services
+- **Jina MCP Tools** - Web search and content scraping
+- **Tavily Remote** - Deep web search
+- **XHS MCP** - Xiaohongshu content publishing
 
-## 📝 许可证
+## ⚠️ Important Notes
 
-本项目仅供学习和研究使用。使用本项目时请遵守：
-- OpenAI API使用条款
-- 小红书平台规则
-- 各MCP服务提供商的使用协议
+### 1. Security
+- ✅ API keys configured through web interface, automatically saved to local files
+- ✅ Config files automatically added to `.gitignore` to prevent leaks
+- ⚠️ Do not commit configuration files with real keys to version control
 
-## 🔗 相关链接
+### 2. MCP Service Dependencies
+- ❗ **Must start Xiaohongshu MCP service first**, otherwise cannot publish content
+- Default MCP service address: `http://localhost:18060/mcp`
+- Can verify service status through "Test Connection" button
 
-- [小红书MCP服务](https://github.com/xpzouying/xiaohongshu-mcp) - 必须的依赖服务
-- [Sealos API平台](https://usw.sealos.io/) - 获取LLM API密钥
-- [Jina AI](https://jina.ai/) - 获取Jina API密钥
-- [Tavily](https://tavily.com/) - 获取Tavily API密钥
+### 3. Network and API
+- Requires stable network connection to access LLM API
+- Search tools require corresponding API keys (optional)
+- Generation process may take 1-3 minutes, please be patient
 
-## 📧 支持与反馈
+### 4. Content Compliance
+- Generated content should be manually reviewed before publishing
+- Ensure content complies with Xiaohongshu platform regulations
+- Avoid sensitive topics or prohibited content
 
-如有问题或建议，欢迎：
-- 提交 Issue
-- 发起 Pull Request
-- 联系项目维护者
+## 🐛 Troubleshooting
 
-## 📚结果
-![img.png](pages/img2.png)
+### Issue 1: Cannot connect to Xiaohongshu MCP service
 
-## ⚠️ 写在最后
-该项目可以作为对 agent 的学习案例，但不建议直接用于生产环境。
+**Symptoms**: "Test Connection" fails, connection error
 
-整体项目的逻辑正在抽象一个更加通用的 agent 架构：
-- 可配置 mcp
-- 可选择不同的 tool 来完成复杂任务
-- Agent 的上下文检索和压缩
-- Agent 的多轮对话和记忆
+**Solutions**:
+1. Confirm [xiaohongshu-mcp](https://github.com/xpzouying/xiaohongshu-mcp) service is started
+2. Check if MCP service address is correct (default `http://localhost:18060/mcp`)
+3. Check if firewall is blocking port 18060
+4. View MCP service logs to confirm its running status
+
+### Issue 2: Content generation fails
+
+**Symptoms**: Generation process errors or returns failure
+
+**Solutions**:
+1. Check if LLM API Key is valid and has sufficient quota
+2. Verify OpenAI Base URL is correct
+3. Confirm network connection is normal
+4. Check backend logs for specific error information
+
+### Issue 3: System keeps iterating after publishing
+
+**Symptoms**: System continues calling tools after successful publishing
+
+**Solutions**:
+- New version fixed: Automatically stops iteration upon detecting successful `publish_content`
+- Ensure using latest code
+
+### Issue 4: Images not displaying
+
+**Symptoms**: Generated content image links are invalid
+
+**Solutions**:
+1. Check if image URLs are accessible (must be HTTPS)
+2. Some images may have hotlink protection
+3. Try different search keywords to get other images
+
+## 🔄 Development Guide
+
+### Modify System Prompts
+
+Prompts are located in the `execute_step` method of `core/content_generator.py`:
+
+```python
+system_prompt = f"""You are a professional Xiaohongshu content creation AI assistant...
+```
+
+### Adjust Research Plan
+
+Research steps are defined in the `get_research_plan` method:
+
+```python
+def get_research_plan(self, user_topic: str) -> List[Dict[str, Any]]:
+    return [
+        {
+            "id": "step1",
+            "title": f"Information retrieval for「{user_topic}」topic",
+            ...
+        },
+        ...
+    ]
+```
+
+### Add New MCP Services
+
+Add new service configuration in the `initialize_servers` method:
+
+```python
+server_config = {
+    "mcpServers": {
+        "your-service": {
+            "command": "...",
+            "args": [...],
+            ...
+        }
+    }
+}
+```
+
+## 📝 License
+
+This project is for learning and research purposes only. When using this project, please comply with:
+- OpenAI API Terms of Service
+- Xiaohongshu platform rules
+- Terms of service for each MCP service provider
+
+## 🔗 Related Links
+
+- [Xiaohongshu MCP Service](https://github.com/xpzouying/xiaohongshu-mcp) - Required dependency service
+- [Sealos API Platform](https://usw.sealos.io/) - Get LLM API key
+- [Jina AI](https://jina.ai/) - Get Jina API key
+- [Tavily](https://tavily.com/) - Get Tavily API key
+
+## 📧 Support & Feedback
+
+For questions or suggestions, welcome to:
+- Submit Issues
+- Create Pull Requests
+- Contact project maintainers
+
+
+## ⚠️ Final Notes
+This project can serve as a learning case for agents, but is not recommended for direct production use.
+
+The overall project logic is abstracting a more general agent architecture:
+- Configurable MCP
+- Select different tools to complete complex tasks
+- Agent context retrieval and compression
+- Agent multi-turn dialogue and memory
 - .....
 
 ---
-** 欢迎 star Happy Creating! 🎉**
+**Welcome to star! Happy Creating! 🎉**
