@@ -1,10 +1,10 @@
 # Xiaohongshu AI Content Generation & Publishing System
 
-[中文](README.md) | English
+[中文](README_ZH.md) | English
 
 An AI-powered intelligent Xiaohongshu (Little Red Book) content generation and automatic publishing web application. It integrates multiple tool services through MCP (Model Context Protocol) to achieve a fully automated workflow from topic input to content publishing.
 
-**In simple terms: Input a topic, and AI handles everything for you, publishing directly to your Xiaohongshu account**
+In simple terms: Input a topic and AI handles everything for you, publishing directly to your Xiaohongshu account
 
 ![img.png](pages/img.png)
 
@@ -26,7 +26,7 @@ This is my personal account, all articles are written by this project
 
 ![img_1.png](pages/img_1.png)
 
-[Personal Homepage](https://www.xiaohongshu.com/user/profile/60857eed0000000001008826) - Welcome to visit, follow me for first-hand AI resources
+[Personal Homepage](https://www.xiaohongshu.com/user/profile/60857eed0000000001008826) Welcome to visit, follow me for first-hand AI resources
 
 
 ## 📋 Prerequisites
@@ -45,7 +45,6 @@ cd xiaohongshu-mcp
 # Default service address: http://localhost:18060/mcp
 ```
 ⚠️Note: You need to log in to your Xiaohongshu account first (follow the login method in the MCP service)
-
 ### 2. System Environment
 
 - Python 3.8+
@@ -76,7 +75,7 @@ Visit `http://localhost:8080` and configure the following information in the lef
 #### Required Configuration
 
 | Configuration | Description | Example |
-|---------------|-------------|---------|
+|--------|------|------|
 | **LLM API Key** | OpenAI-compatible API key | `sk-xxx...` |
 | **OpenAI Base URL** | API base address | `https://api.openai.com/v1` or `https://usw.sealos.io/v1` |
 | **Default Model** | LLM model to use | `claude-sonnet-4-20250514` (recommended) |
@@ -85,7 +84,7 @@ Visit `http://localhost:8080` and configure the following information in the lef
 #### Optional Configuration
 
 | Configuration | Description | How to Get |
-|---------------|-------------|------------|
+|--------|------|----------|
 | **Jina API Key** | Jina search service key | [Jina Official Site](https://jina.ai/) |
 | **Tavily API Key** | Tavily search service key | [Tavily Official Site](https://tavily.com/) |
 
@@ -104,8 +103,7 @@ Recommend using Tavily as the search tool, which offers 1000 free search request
 
 - "ByteDance's Doubao Model: Daily API calls exceed 30 trillion tokens, with impressive growth!"
 ![img.png](pages/img2.png)
-- "Claude 3.5 Sonnet User Experience"
-- "AI Development Trends Prediction for 2025"
+
 - "Transformer Architecture Explained"
 ![img.png](pages/img_3.png)
 
@@ -215,7 +213,7 @@ The system uses a 4-step workflow to automatically generate and publish content:
 ## 🌐 API Endpoints
 
 | Method | Path | Description |
-|--------|------|-------------|
+|------|------|------|
 | GET | `/` | Main page |
 | GET | `/api/config` | Get configuration (hides sensitive info) |
 | POST | `/api/config` | Save configuration |
@@ -239,109 +237,6 @@ The system uses a 4-step workflow to automatically generate and publish content:
 - **Jina MCP Tools** - Web search and content scraping
 - **Tavily Remote** - Deep web search
 - **XHS MCP** - Xiaohongshu content publishing
-
-## ⚠️ Important Notes
-
-### 1. Security
-- ✅ API keys configured through web interface, automatically saved to local files
-- ✅ Config files automatically added to `.gitignore` to prevent leaks
-- ⚠️ Do not commit configuration files with real keys to version control
-
-### 2. MCP Service Dependencies
-- ❗ **Must start Xiaohongshu MCP service first**, otherwise cannot publish content
-- Default MCP service address: `http://localhost:18060/mcp`
-- Can verify service status through "Test Connection" button
-
-### 3. Network and API
-- Requires stable network connection to access LLM API
-- Search tools require corresponding API keys (optional)
-- Generation process may take 1-3 minutes, please be patient
-
-### 4. Content Compliance
-- Generated content should be manually reviewed before publishing
-- Ensure content complies with Xiaohongshu platform regulations
-- Avoid sensitive topics or prohibited content
-
-## 🐛 Troubleshooting
-
-### Issue 1: Cannot connect to Xiaohongshu MCP service
-
-**Symptoms**: "Test Connection" fails, connection error
-
-**Solutions**:
-1. Confirm [xiaohongshu-mcp](https://github.com/xpzouying/xiaohongshu-mcp) service is started
-2. Check if MCP service address is correct (default `http://localhost:18060/mcp`)
-3. Check if firewall is blocking port 18060
-4. View MCP service logs to confirm its running status
-
-### Issue 2: Content generation fails
-
-**Symptoms**: Generation process errors or returns failure
-
-**Solutions**:
-1. Check if LLM API Key is valid and has sufficient quota
-2. Verify OpenAI Base URL is correct
-3. Confirm network connection is normal
-4. Check backend logs for specific error information
-
-### Issue 3: System keeps iterating after publishing
-
-**Symptoms**: System continues calling tools after successful publishing
-
-**Solutions**:
-- New version fixed: Automatically stops iteration upon detecting successful `publish_content`
-- Ensure using latest code
-
-### Issue 4: Images not displaying
-
-**Symptoms**: Generated content image links are invalid
-
-**Solutions**:
-1. Check if image URLs are accessible (must be HTTPS)
-2. Some images may have hotlink protection
-3. Try different search keywords to get other images
-
-## 🔄 Development Guide
-
-### Modify System Prompts
-
-Prompts are located in the `execute_step` method of `core/content_generator.py`:
-
-```python
-system_prompt = f"""You are a professional Xiaohongshu content creation AI assistant...
-```
-
-### Adjust Research Plan
-
-Research steps are defined in the `get_research_plan` method:
-
-```python
-def get_research_plan(self, user_topic: str) -> List[Dict[str, Any]]:
-    return [
-        {
-            "id": "step1",
-            "title": f"Information retrieval for「{user_topic}」topic",
-            ...
-        },
-        ...
-    ]
-```
-
-### Add New MCP Services
-
-Add new service configuration in the `initialize_servers` method:
-
-```python
-server_config = {
-    "mcpServers": {
-        "your-service": {
-            "command": "...",
-            "args": [...],
-            ...
-        }
-    }
-}
-```
 
 ## 📝 License
 

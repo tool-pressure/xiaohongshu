@@ -104,8 +104,6 @@ python app.py
 
 - "字节跳动的豆包大模型：日均调用超30万亿tokens，增长势头惊人！"
 ![img.png](pages/img2.png)
-- "Claude 3.5 Sonnet 使用体验"
-
 - "Transformer架构详解"
 ![img.png](pages/img_3.png)
 
