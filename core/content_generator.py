@@ -8,8 +8,7 @@ import os
 import tempfile
 import shutil
 from typing import Any, Dict, List, Optional
-from xhs_llm_client import Configuration, Server, LLMClient, Tool
-
+from core.xhs_llm_client import Configuration, Server, LLMClient, Tool
 
 logger = logging.getLogger(__name__)
 
@@ -295,6 +294,7 @@ class ContentGenerator:
             max_iterations = 10
             iteration = 0
             publish_success = False  # 添加发布成功标志
+            publish_error = None  # 保存发布失败的错误信息
 
             # 第一轮：初始工具调用
             response = self.llm_client.get_tool_call_response(messages, openai_tools)
@@ -363,6 +363,10 @@ class ContentGenerator:
                                 if "success" in result_str or "成功" in result_str or "published" in result_str:
                                     publish_success = True
                                     logger.info("✅ 检测到发布成功，将在本轮结束后停止迭代")
+                                else:
+                                    # 保存详细的错误信息
+                                    publish_error = str(tool_result)
+                                    logger.error(f"❌ 发布失败: {publish_error}")
 
                             # 记录工具调用详情
                             tool_detail = {
@@ -413,7 +417,9 @@ class ContentGenerator:
                 "tool_calls": all_tool_call_details,
                 "total_iterations": iteration,
                 "response": final_content,
-                "success": True
+                "success": True,
+                "publish_success": publish_success,  # 添加发布成功标志
+                "publish_error": publish_error  # 添加发布错误信息
             }
 
             return step_result
@@ -466,6 +472,32 @@ class ContentGenerator:
                     }
 
                 logger.info(f"步骤 {step['id']} 执行成功")
+
+            # 检查发布步骤（step4）是否成功
+            step4_result = next((r for r in results if r['step_id'] == 'step4'), None)
+            publish_success = step4_result.get('publish_success', False) if step4_result else False
+
+            # 如果发布失败，返回失败结果，包含详细的错误信息
+            if not publish_success:
+                logger.error("内容发布失败")
+                publish_error = step4_result.get('publish_error', '') if step4_result else ''
+
+                # 构建详细的错误消息
+                error_message = '内容生成完成，但发布到小红书失败。'
+                if publish_error:
+                    # 清理错误信息，使其更易读
+                    error_detail = publish_error.strip()
+                    # 如果错误信息太长，截取前500个字符
+                    if len(error_detail) > 500:
+                        error_detail = error_detail[:500] + '...'
+                    error_message += f'\n\n错误详情：{error_detail}'
+                else:
+                    error_message += '\n请检查小红书MCP服务连接或稍后重试。'
+
+                return {
+                    'success': False,
+                    'error': error_message
+                }
 
             # 从最后一步的结果中提取发布信息
             last_result = results[-1]

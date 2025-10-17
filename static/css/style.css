@@ -341,6 +341,32 @@ body {
     color: #909399;
 }
 
+/* 模型验证状态 */
+.validation-status {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 3px;
+    transition: all 0.2s;
+}
+
+.validation-status.validating {
+    color: #909399;
+    background: #f4f4f5;
+}
+
+.validation-status.valid {
+    color: #67c23a;
+    background: #f0f9ff;
+}
+
+.validation-status.invalid {
+    color: #f56c6c;
+    background: #fef0f0;
+}
+
 .btn-generate {
     width: 100%;
     padding: 14px;

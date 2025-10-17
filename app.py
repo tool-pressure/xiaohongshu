@@ -78,6 +78,12 @@ class TestLoginRequest(BaseModel):
     xhs_mcp_url: str
 
 
+class ValidateModelRequest(BaseModel):
+    llm_api_key: str
+    openai_base_url: str
+    model_name: str
+
+
 class GeneratePublishRequest(BaseModel):
     topic: str
 
@@ -126,6 +132,69 @@ async def save_config(config_data: ConfigRequest) -> Dict[str, Any]:
         raise
     except Exception as e:
         logger.error(f"保存配置失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/validate-model")
+async def validate_model(request_data: ValidateModelRequest) -> Dict[str, Any]:
+    """验证模型是否可用"""
+    try:
+        llm_api_key = request_data.llm_api_key
+        openai_base_url = request_data.openai_base_url
+        model_name = request_data.model_name
+
+        if not llm_api_key or not openai_base_url or not model_name:
+            raise HTTPException(status_code=400, detail="请提供完整的参数")
+
+        # 尝试调用模型进行验证
+        try:
+            from openai import OpenAI
+
+            client = OpenAI(
+                api_key=llm_api_key,
+                base_url=openai_base_url
+            )
+
+            # 发送一个简单的测试请求
+            response = client.chat.completions.create(
+                model=model_name,
+                messages=[
+                    {"role": "user", "content": "Hi"}
+                ],
+                max_tokens=5,
+                timeout=10
+            )
+
+            if response and response.choices:
+                return {
+                    'success': True,
+                    'message': f'模型 {model_name} 验证成功',
+                    'model': model_name
+                }
+            else:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f'模型 {model_name} 响应异常'
+                )
+
+        except Exception as e:
+            error_msg = str(e)
+            # 检查是否是模型不存在的错误
+            if 'model_not_found' in error_msg.lower() or 'does not exist' in error_msg.lower() or 'invalid model' in error_msg.lower():
+                raise HTTPException(
+                    status_code=400,
+                    detail=f'模型 {model_name} 不存在或不可用'
+                )
+            else:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f'模型验证失败: {error_msg}'
+                )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"验证模型失败: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

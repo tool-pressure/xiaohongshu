@@ -1,5 +1,8 @@
 const API_BASE = '/api';
 
+// 防抖函数
+let modelValidationTimeout = null;
+
 // 折叠面板
 function togglePanel(panelId) {
     const panel = document.getElementById(`${panelId}-panel`);
@@ -8,6 +11,60 @@ function togglePanel(panelId) {
     panel.classList.toggle('collapsed');
     toggle.classList.toggle('collapsed');
     toggle.textContent = panel.classList.contains('collapsed') ? '▶' : '▼';
+}
+
+// 验证模型是否可用
+async function validateModel() {
+    const apiKey = document.getElementById('llm_api_key').value.trim();
+    const baseUrl = document.getElementById('openai_base_url').value.trim();
+    const modelName = document.getElementById('default_model').value.trim();
+    const statusEl = document.getElementById('model-validation-status');
+
+    // 清空之前的状态
+    statusEl.textContent = '';
+    statusEl.className = 'validation-status';
+
+    // 检查必填字段
+    if (!apiKey || !baseUrl || !modelName) {
+        return;
+    }
+
+    // 显示验证中状态
+    statusEl.textContent = '验证中...';
+    statusEl.className = 'validation-status validating';
+
+    try {
+        const response = await fetch(`${API_BASE}/validate-model`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                llm_api_key: apiKey,
+                openai_base_url: baseUrl,
+                model_name: modelName
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            statusEl.textContent = '✓ 模型可用';
+            statusEl.className = 'validation-status valid';
+        } else {
+            statusEl.textContent = `✗ ${data.detail || '模型验证失败'}`;
+            statusEl.className = 'validation-status invalid';
+        }
+    } catch (error) {
+        statusEl.textContent = `✗ 验证失败: ${error.message}`;
+        statusEl.className = 'validation-status invalid';
+    }
+}
+
+// 防抖验证模型
+function debounceValidateModel() {
+    if (modelValidationTimeout) {
+        clearTimeout(modelValidationTimeout);
+    }
+    modelValidationTimeout = setTimeout(validateModel, 800);
 }
 
 // 显示Toast消息
@@ -214,5 +271,18 @@ document.addEventListener('keydown', (e) => {
         if (document.activeElement === topicInput) {
             startGenerate();
         }
+    }
+});
+
+// 监听模型输入框的变化
+document.addEventListener('DOMContentLoaded', () => {
+    const modelInput = document.getElementById('default_model');
+    const apiKeyInput = document.getElementById('llm_api_key');
+    const baseUrlInput = document.getElementById('openai_base_url');
+
+    if (modelInput) {
+        modelInput.addEventListener('input', debounceValidateModel);
+        apiKeyInput.addEventListener('input', debounceValidateModel);
+        baseUrlInput.addEventListener('input', debounceValidateModel);
     }
 });
