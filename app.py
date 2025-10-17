@@ -144,13 +144,13 @@ async def validate_model(request_data: ValidateModelRequest) -> Dict[str, Any]:
         model_name = request_data.model_name
 
         if not llm_api_key or not openai_base_url or not model_name:
-            raise HTTPException(status_code=400, detail="请提供完整的参数")
+            raise HTTPException(status_code=400, detail="请检查LLM API key、Base URL和模型名称是否填写完整")
 
         # 尝试调用模型进行验证
         try:
-            from openai import OpenAI
+            import openai
 
-            client = OpenAI(
+            client = openai.OpenAI(
                 api_key=llm_api_key,
                 base_url=openai_base_url
             )
@@ -161,8 +161,7 @@ async def validate_model(request_data: ValidateModelRequest) -> Dict[str, Any]:
                 messages=[
                     {"role": "user", "content": "Hi"}
                 ],
-                max_tokens=5,
-                timeout=10
+                stream=False
             )
 
             if response and response.choices:
