@@ -141,23 +141,33 @@ body {
 }
 
 .input-group input,
-.input-group select {
+.input-group select,
+.input-group textarea {
     width: 100%;
     padding: 8px 12px;
     border: 1px solid #dcdfe6;
     border-radius: 4px;
     font-size: 14px;
     transition: border-color 0.2s;
+    font-family: inherit;
 }
 
 .input-group input:focus,
-.input-group select:focus {
+.input-group select:focus,
+.input-group textarea:focus {
     outline: none;
     border-color: #409eff;
 }
 
-.input-group input::placeholder {
+.input-group input::placeholder,
+.input-group textarea::placeholder {
     color: #c0c4cc;
+}
+
+.input-group textarea {
+    resize: vertical;
+    min-height: 60px;
+    line-height: 1.5;
 }
 
 .link-hint {
@@ -389,6 +399,62 @@ body {
     transform: translateY(0);
 }
 
+/* 生成面板样式 */
+.generate-panel {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+.generate-panel .panel-header {
+    background: rgba(255, 255, 255, 0.15);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    cursor: default;
+}
+
+.generate-panel .panel-header:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.generate-panel .panel-body {
+    background: #fff;
+}
+
+.generate-form {
+    display: flex;
+    gap: 16px;
+    align-items: flex-end;
+    margin-bottom: 12px;
+}
+
+.generate-form .input-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.generate-form input {
+    border: 2px solid #e8eaed;
+    transition: all 0.2s;
+    height: 44px;
+}
+
+.generate-form input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.generate-form .btn-generate {
+    width: auto;
+    padding: 12px 32px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    height: 44px;
+}
+
+.generate-hint {
+    margin: 0;
+}
+
 /* 信息面板样式 */
 .info-panel .panel-header {
     cursor: default;
@@ -522,5 +588,14 @@ body {
 
     .brand-text {
         font-size: 16px;
+    }
+
+    .generate-form {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .generate-form .btn-generate {
+        width: 100%;
     }
 }

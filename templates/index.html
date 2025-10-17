@@ -62,23 +62,6 @@
                     </div>
                 </div>
 
-                <!-- 内容生成面板 -->
-                <div class="panel">
-                    <div class="panel-header">
-                        <span>✨ 内容生成与发布</span>
-                    </div>
-                    <div class="panel-body">
-                        <div class="input-group">
-                            <label>输入主题 <span class="required">*</span></label>
-                            <input type="text" id="topic" class="input-large" placeholder="例如：DeepSeek R1 最新进展、Claude 3.5 使用体验">
-                            <p class="input-hint">💡 输入您想创作的主题，AI将自动搜索相关信息并生成小红书内容</p>
-                        </div>
-                        <button class="btn btn-generate" onclick="startGenerate()">
-                            🚀 开始生成并发布
-                        </button>
-                    </div>
-                </div>
-
                 <!-- 使用指南 -->
                 <div class="panel info-panel">
                     <div class="panel-header">
@@ -109,6 +92,25 @@
 
             <!-- 右侧主内容 -->
             <main class="content-area">
+                <!-- 内容生成面板 -->
+                <div class="panel generate-panel">
+                    <div class="panel-header">
+                        <span>✨ 内容生成与发布</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="generate-form">
+                            <div class="input-group">
+                                <label>输入主题 <span class="required">*</span></label>
+                                <input type="text" id="topic" placeholder="例如：DeepSeek R1 最新进展、Claude 3.5 使用体验、AI 论文解读">
+                            </div>
+                            <button class="btn btn-generate" onclick="startGenerate()">
+                                🚀 开始生成并发布
+                            </button>
+                        </div>
+                        <p class="input-hint generate-hint">💡 输入您想创作的主题，AI将自动搜索相关信息并生成小红书内容</p>
+                    </div>
+                </div>
+
                 <!-- 进度面板 -->
                 <div class="panel">
                     <div class="panel-header">
