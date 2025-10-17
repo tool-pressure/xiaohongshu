@@ -2,26 +2,14 @@
 内容生成器模块
 基于原有的RealToolExecutor重构，用于生成和发布小红书内容
 """
-import asyncio
 import json
 import logging
 import os
-import sys
 import tempfile
 import shutil
-import xml.etree.ElementTree as ET
 from typing import Any, Dict, List, Optional
-from pathlib import Path
+from xhs_llm_client import Configuration, Server, LLMClient, Tool
 
-# 添加原项目路径到sys.path，以便导入原有的模块
-parent_dir = Path(__file__).parent.parent.parent / 'xhs'
-sys.path.insert(0, str(parent_dir))
-
-try:
-    from xhs_llm_client import Configuration, Server, LLMClient, Tool
-except ImportError:
-    logging.error("无法导入xhs_llm_client模块，请确保原项目目录结构正确")
-    raise
 
 logger = logging.getLogger(__name__)
 
