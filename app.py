@@ -79,6 +79,8 @@ class TestLoginRequest(BaseModel):
 
 
 class ValidateModelRequest(BaseModel):
+    model_config = {"protected_namespaces": ()}
+
     llm_api_key: str
     openai_base_url: str
     model_name: str

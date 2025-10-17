@@ -111,32 +111,32 @@ class ContentGenerator:
             },
             {
                 "id": "step3",
-                "title": "小红书格式适配与内容优化",
+                "title": "小红书格式适配与发布",
                 "description": (
                     "1. 将文章调整为适合小红书的格式：\n"
                     "   - 标题控制在20字以内，突出亮点和价值，如果是「论文分享要保留这几个字」\n"
                     "   - 正文移除所有#开头的标签，改为自然语言表达，正文不超过1000字\n"
                     "   - 提取5个精准的话题标签到tags数组\n"
-                    "   - 确保提供3-4张图片，所有链接都是可访问的HTTPS地址，不是网页的地址呢\n"
-                    "2. 生成标准的JSON格式输出，包含title、content、images、tags四个字段。\n"
-                    "3. 验证内容的完整性和格式的正确性，确保符合发布要求。"
-                    "4. 添加相关内容给的url地址放到文后，比如某些github的地址，论文地址等"
+                    "   - 确保提供3-4张图片，所有链接都是内容为图片的可访问的HTTPS地址\n"
+                    "   - 添加相关内容的url地址放到文后，比如某些github的地址，论文地址等\n"
+                    "2. 整理成标准的JSON格式（仅在内部使用，不输出）：\n"
+                    "   {\n"
+                    "     \"title\": \"吸引人的标题（20字以内）\",\n"
+                    "     \"content\": \"正文内容（800-1000字，包含emoji和相关链接）\",\n"
+                    "     \"images\": [\n"
+                    "       \"https://example.com/image1.jpg\",\n"
+                    "       \"https://example.com/image2.jpg\",\n"
+                    "       \"https://example.com/image3.jpg\"\n"
+                    "     ],\n"
+                    "     \"tags\": [\"标签1\", \"标签2\", \"标签3\", \"标签4\", \"标签5\"]\n"
+                    "   }\n"
+                    "3. 验证内容的完整性和格式的正确性，确保符合发布要求。\n"
+                    "4. 直接使用publish_content工具发布到小红书：\n"
+                    "   - 使用整理好的title、content、images、tags参数\n"
+                    "   - 一次性完成格式化和发布操作\n"
+                    "**注意**: 前面的步骤已经完成了详细的信息收集，这一步只需要整理格式并直接发布即可，不需要做额外的查询工作"
                 ),
-                "depends on": ["step2"]
-            },
-            {
-                "id": "step4",
-                "title": "发布到小红书平台",
-                "description": (
-                    "提取上一步的JSON内容后直接使用<publish_content>工具来进行发布\n"
-                    "使用<publish_content>小红书MCP工具，将格式化后的内容进行发布：\n"
-                    "   - title作为动态标题\n"
-                    "   - content作为正文内容\n"
-                    "   - images作为配图（3-4张高质量图片）\n"
-                    "   - tags作为话题标签\n"
-                    "**注意**: 前面的步骤经过了详细的信息收集了，只需要将内容进行发布即可，不需要这一步做额外的查询工作"
-                ),
-                "depends on": ["step1", "step2", "step3"]
+                "depends on": ["step1", "step2"]
             }
         ]
 
@@ -473,14 +473,14 @@ class ContentGenerator:
 
                 logger.info(f"步骤 {step['id']} 执行成功")
 
-            # 检查发布步骤（step4）是否成功
-            step4_result = next((r for r in results if r['step_id'] == 'step4'), None)
-            publish_success = step4_result.get('publish_success', False) if step4_result else False
+            # 检查发布步骤（step3）是否成功
+            step3_result = next((r for r in results if r['step_id'] == 'step3'), None)
+            publish_success = step3_result.get('publish_success', False) if step3_result else False
 
             # 如果发布失败，返回失败结果，包含详细的错误信息
             if not publish_success:
                 logger.error("内容发布失败")
-                publish_error = step4_result.get('publish_error', '') if step4_result else ''
+                publish_error = step3_result.get('publish_error', '') if step3_result else ''
 
                 # 构建详细的错误消息
                 error_message = '内容生成完成，但发布到小红书失败。'
@@ -499,42 +499,38 @@ class ContentGenerator:
                     'error': error_message
                 }
 
-            # 从最后一步的结果中提取发布信息
-            last_result = results[-1]
-            response_content = last_result.get('response', '')
+            # 从 step3 的工具调用中提取实际发布的内容
+            step3_result = next((r for r in results if r['step_id'] == 'step3'), None)
+            content_data = {
+                'title': f'关于{topic}的精彩内容',
+                'content': '',
+                'tags': [topic],
+                'images': []
+            }
 
-            # 尝试从响应中提取JSON内容（标题、内容、标签等）
-            try:
-                # 查找step3的结果（小红书格式适配）
-                step3_result = next((r for r in results if r['step_id'] == 'step3'), None)
-                if step3_result and step3_result.get('response'):
-                    # 尝试从响应中提取JSON
-                    import re
-                    json_match = re.search(r'\{[^{}]*"title"[^{}]*\}', step3_result['response'], re.DOTALL)
-                    if json_match:
-                        content_data = json.loads(json_match.group())
-                    else:
+            # 尝试从 tool_calls 中提取 publish_content 的参数
+            if step3_result and step3_result.get('tool_calls'):
+                try:
+                    # 查找 publish_content 工具调用
+                    publish_call = next(
+                        (tc for tc in step3_result['tool_calls'] if tc['name'] == 'publish_content'),
+                        None
+                    )
+
+                    if publish_call and publish_call.get('arguments'):
+                        # 从工具调用参数中提取实际发布的内容
+                        args = publish_call['arguments']
                         content_data = {
-                            'title': f'关于{topic}的精彩内容',
-                            'content': response_content[:500],
-                            'tags': [topic],
-                            'images': []
+                            'title': args.get('title', f'关于{topic}的精彩内容'),
+                            'content': args.get('content', ''),
+                            'tags': args.get('tags', [topic]),
+                            'images': args.get('images', [])
                         }
-                else:
-                    content_data = {
-                        'title': f'关于{topic}的精彩内容',
-                        'content': response_content[:500],
-                        'tags': [topic],
-                        'images': []
-                    }
-            except Exception as e:
-                logger.error(f"解析内容数据失败: {e}")
-                content_data = {
-                    'title': f'关于{topic}的精彩内容',
-                    'content': response_content[:500],
-                    'tags': [topic],
-                    'images': []
-                }
+                        logger.info(f"成功从 publish_content 参数中提取内容数据")
+                    else:
+                        logger.warning("未找到 publish_content 工具调用或参数为空")
+                except Exception as e:
+                    logger.error(f"从工具调用参数中提取内容失败: {e}")
 
             return {
                 'success': True,
