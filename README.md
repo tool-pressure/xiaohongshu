@@ -6,8 +6,9 @@ An AI-powered intelligent Xiaohongshu (Little Red Book) content generation and a
 
 In simple terms: Input a topic and AI handles everything for you, publishing directly to your Xiaohongshu account
 
+System main interface:
 ![img.png](pages/img.png)
-
+![img.png](pages/img_2.png)
 
 ## ✨ Features
 

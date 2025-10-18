@@ -1,12 +1,13 @@
 # 小红书内容自动生成与发布系统
 
-中文 | [English](README_EN.md)
+中文 | [English](README.md)
 
 一个基于AI的智能小红书内容生成和自动发布Web应用，通过MCP（Model Context Protocol）集成多种工具服务，
 实现从主题输入到内容发布的全自动化流程。
 
 简单来说：输入一个主题所有 AI 帮你搞定，直接发布到你的小红书账号上
 
+系统主界面：
 ![img.png](pages/img.png)
 ![img.png](pages/img_2.png)
 
