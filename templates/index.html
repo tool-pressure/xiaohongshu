@@ -114,15 +114,28 @@
                 <!-- 进度面板 -->
                 <div class="panel">
                     <div class="panel-header">
-                        <span>📊 执行进度</span>
+                        <span>📊 当前任务</span>
                     </div>
                     <div class="panel-body">
-                        <div class="progress-container">
-                            <div class="progress-bar">
-                                <div class="progress-value" id="progress-value"></div>
+                        <div class="current-task">
+                            <div class="task-topic" id="current-topic">等待任务开始...</div>
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-value" id="progress-value"></div>
+                                </div>
+                                <div class="progress-text" id="progress-text">等待任务开始...</div>
                             </div>
-                            <div class="progress-text" id="progress-text">等待任务开始...</div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- 历史任务面板 -->
+                <div class="panel" id="history-panel" style="display: none;">
+                    <div class="panel-header">
+                        <span>📝 任务历史</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="task-history" id="task-history"></div>
                     </div>
                 </div>
 

@@ -224,6 +224,23 @@ body {
     border-color: #409eff;
 }
 
+/* 当前任务 */
+.current-task {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.task-topic {
+    font-size: 15px;
+    font-weight: 600;
+    color: #2c3e50;
+    padding: 12px 16px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #667eea;
+}
+
 /* 进度容器 */
 .progress-container {
     display: flex;
@@ -250,6 +267,144 @@ body {
     font-size: 13px;
     color: #606266;
     text-align: center;
+}
+
+/* 任务历史 */
+.task-history {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 4px 0;
+}
+
+.task-history::-webkit-scrollbar {
+    height: 6px;
+}
+
+.task-history::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.task-history::-webkit-scrollbar-thumb {
+    background: #c0c4cc;
+    border-radius: 3px;
+}
+
+.task-history::-webkit-scrollbar-thumb:hover {
+    background: #909399;
+}
+
+.task-card {
+    min-width: 280px;
+    max-width: 280px;
+    padding: 12px 16px;
+    background: #fff;
+    border: 2px solid #e4e7ed;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: all 0.3s ease;
+    animation: slideInCard 0.4s ease;
+}
+
+@keyframes slideInCard {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.task-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.task-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.task-card-topic {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2c3e50;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.task-card-status {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.task-card-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.task-card-progress-bar {
+    height: 4px;
+    background: #e4e7ed;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.task-card-progress-value {
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 2px;
+}
+
+.task-card-progress-text {
+    font-size: 11px;
+    color: #909399;
+}
+
+/* 任务状态颜色 */
+.task-card.success {
+    border-color: #67c23a;
+}
+
+.task-card.success .task-card-progress-value {
+    background: linear-gradient(90deg, #67c23a, #85ce61);
+}
+
+.task-card.error {
+    border-color: #f56c6c;
+}
+
+.task-card.error .task-card-progress-value {
+    background: linear-gradient(90deg, #f56c6c, #f78989);
+}
+
+.task-card.running {
+    border-color: #409eff;
+}
+
+.task-card.running .task-card-progress-value {
+    background: linear-gradient(90deg, #409eff, #66b1ff);
+    animation: progressPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes progressPulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
 }
 
 /* 结果面板 */

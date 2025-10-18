@@ -3,6 +3,9 @@ const API_BASE = '/api';
 // 防抖函数
 let modelValidationTimeout = null;
 
+// 任务管理 - 简化版
+let currentTaskTopic = null;
+
 // 折叠面板
 function togglePanel(panelId) {
     const panel = document.getElementById(`${panelId}-panel`);
@@ -163,7 +166,58 @@ function updateProgress(percent, text) {
     document.getElementById('progress-text').textContent = text;
 }
 
-// 开始生成
+// 将当前任务添加到历史 - 超级简化版
+function moveCurrentToHistory() {
+    const currentTopic = document.getElementById('current-topic').textContent;
+    const currentProgress = parseInt(document.getElementById('progress-value').style.width) || 0;
+    const currentText = document.getElementById('progress-text').textContent;
+
+    // 如果当前任务不是初始状态，才添加到历史
+    if (currentTopic !== '等待任务开始...') {
+        const historyPanel = document.getElementById('history-panel');
+        const historyContainer = document.getElementById('task-history');
+
+        // 显示历史面板
+        historyPanel.style.display = 'block';
+
+        // 判断状态
+        let status = 'running';
+        let statusIcon = '⏳';
+        if (currentProgress === 100) {
+            status = 'success';
+            statusIcon = '✅';
+        } else if (currentText.includes('失败') || currentText.includes('错误')) {
+            status = 'error';
+            statusIcon = '❌';
+        }
+
+        // 创建历史卡片
+        const card = document.createElement('div');
+        card.className = `task-card ${status}`;
+        card.innerHTML = `
+            <div class="task-card-header">
+                <div class="task-card-topic" title="${currentTopic}">${currentTopic}</div>
+                <div class="task-card-status">${statusIcon}</div>
+            </div>
+            <div class="task-card-progress">
+                <div class="task-card-progress-bar">
+                    <div class="task-card-progress-value" style="width: ${currentProgress}%"></div>
+                </div>
+                <div class="task-card-progress-text">${currentText}</div>
+            </div>
+        `;
+
+        // 插入到最前面
+        historyContainer.insertBefore(card, historyContainer.firstChild);
+
+        // 自动滚动
+        setTimeout(() => {
+            card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+        }, 100);
+    }
+}
+
+// 开始生成 - 超级简化版
 async function startGenerate() {
     const topic = document.getElementById('topic').value.trim();
 
@@ -171,6 +225,15 @@ async function startGenerate() {
         showToast('请输入主题', 'error');
         return;
     }
+
+    // 将当前任务移到历史
+    moveCurrentToHistory();
+
+    // 更新当前任务
+    document.getElementById('current-topic').textContent = topic;
+
+    // 清空输入框
+    document.getElementById('topic').value = '';
 
     // 隐藏结果面板
     document.getElementById('result-panel').style.display = 'none';
@@ -205,11 +268,11 @@ async function startGenerate() {
             showResult(data.data);
             showToast('内容生成并发布成功', 'success');
         } else {
-            updateProgress(0, '等待任务开始...');
+            updateProgress(0, data.error || '生成失败');
             showToast(data.error || '生成失败', 'error');
         }
     } catch (error) {
-        updateProgress(0, '等待任务开始...');
+        updateProgress(0, `操作失败: ${error.message}`);
         showToast(`操作失败：${error.message}`, 'error');
     }
 }
