@@ -3,8 +3,8 @@ const API_BASE = '/api';
 // 防抖函数
 let modelValidationTimeout = null;
 
-// 任务管理 - 简化版
-let currentTaskTopic = null;
+// 任务管理 - 重新设计
+let taskCardMap = {}; // { taskId: cardId } 映射任务ID到卡片ID
 
 // 折叠面板
 function togglePanel(panelId) {
@@ -160,20 +160,83 @@ async function testConnection() {
     }
 }
 
-// 更新进度
-function updateProgress(percent, text) {
-    document.getElementById('progress-value').style.width = `${percent}%`;
-    document.getElementById('progress-text').textContent = text;
+// 更新进度 - 支持任务ID参数
+function updateProgress(taskIdOrPercent, percentOrText, textOrUndefined) {
+    let taskId, percent, text;
+
+    // 兼容旧的调用方式 updateProgress(percent, text)
+    if (typeof taskIdOrPercent === 'number' && typeof percentOrText === 'string') {
+        // 旧方式：updateProgress(10, '开始...')
+        taskId = null;
+        percent = taskIdOrPercent;
+        text = percentOrText;
+    } else {
+        // 新方式：updateProgress(taskId, 10, '开始...')
+        taskId = taskIdOrPercent;
+        percent = percentOrText;
+        text = textOrUndefined;
+    }
+
+    // 如果没有taskId，检查当前任务的taskId
+    if (!taskId) {
+        const currentTopicEl = document.getElementById('current-topic');
+        taskId = currentTopicEl ? currentTopicEl.dataset.taskId : null;
+    }
+
+    // 更新当前任务显示（如果是当前任务）
+    const currentTopicEl = document.getElementById('current-topic');
+    if (currentTopicEl && currentTopicEl.dataset.taskId === taskId) {
+        document.getElementById('progress-value').style.width = `${percent}%`;
+        document.getElementById('progress-text').textContent = text;
+    }
+
+    // 更新历史卡片（如果任务在历史中）
+    if (taskId && taskCardMap[taskId]) {
+        const cardId = taskCardMap[taskId];
+        const card = document.getElementById(cardId);
+        if (card) {
+            // 更新进度条
+            const progressBar = card.querySelector('.task-card-progress-value');
+            if (progressBar) {
+                progressBar.style.width = `${percent}%`;
+            }
+
+            // 更新进度文字
+            const progressText = card.querySelector('.task-card-progress-text');
+            if (progressText) {
+                progressText.textContent = text;
+            }
+
+            // 更新状态
+            let status = 'running';
+            let statusIcon = '⏳';
+            if (percent === 100) {
+                status = 'success';
+                statusIcon = '✅';
+            } else if (text.includes('失败') || text.includes('错误')) {
+                status = 'error';
+                statusIcon = '❌';
+            }
+
+            card.className = `task-card ${status}`;
+            const statusEl = card.querySelector('.task-card-status');
+            if (statusEl) {
+                statusEl.textContent = statusIcon;
+            }
+        }
+    }
 }
 
-// 将当前任务添加到历史 - 超级简化版
+// 将当前任务添加到历史
 function moveCurrentToHistory() {
-    const currentTopic = document.getElementById('current-topic').textContent;
+    const currentTopicEl = document.getElementById('current-topic');
+    const currentTopic = currentTopicEl.textContent;
+    const currentTaskId = currentTopicEl.dataset.taskId;
     const currentProgress = parseInt(document.getElementById('progress-value').style.width) || 0;
     const currentText = document.getElementById('progress-text').textContent;
 
     // 如果当前任务不是初始状态，才添加到历史
-    if (currentTopic !== '等待任务开始...') {
+    if (currentTopic !== '等待任务开始...' && currentTaskId) {
         const historyPanel = document.getElementById('history-panel');
         const historyContainer = document.getElementById('task-history');
 
@@ -191,8 +254,10 @@ function moveCurrentToHistory() {
             statusIcon = '❌';
         }
 
-        // 创建历史卡片
+        // 创建历史卡片，使用唯一ID
+        const cardId = 'task-card-' + Date.now();
         const card = document.createElement('div');
+        card.id = cardId;
         card.className = `task-card ${status}`;
         card.innerHTML = `
             <div class="task-card-header">
@@ -210,14 +275,17 @@ function moveCurrentToHistory() {
         // 插入到最前面
         historyContainer.insertBefore(card, historyContainer.firstChild);
 
-        // 自动滚动
+        // 建立任务ID到卡片ID的映射
+        taskCardMap[currentTaskId] = cardId;
+
+        // 自动滚动到历史面板
         setTimeout(() => {
-            card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+            historyPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }, 100);
     }
 }
 
-// 开始生成 - 超级简化版
+// 开始生成 - 带任务ID追踪
 async function startGenerate() {
     const topic = document.getElementById('topic').value.trim();
 
@@ -226,11 +294,16 @@ async function startGenerate() {
         return;
     }
 
+    // 创建新任务ID
+    const taskId = 'task-' + Date.now();
+
     // 将当前任务移到历史
     moveCurrentToHistory();
 
-    // 更新当前任务
-    document.getElementById('current-topic').textContent = topic;
+    // 更新当前任务，保存任务ID
+    const currentTopicEl = document.getElementById('current-topic');
+    currentTopicEl.textContent = topic;
+    currentTopicEl.dataset.taskId = taskId;
 
     // 清空输入框
     document.getElementById('topic').value = '';
@@ -239,7 +312,7 @@ async function startGenerate() {
     document.getElementById('result-panel').style.display = 'none';
 
     // 开始进度
-    updateProgress(10, '开始生成内容...');
+    updateProgress(taskId, 10, '开始生成内容...');
 
     try {
         const response = await fetch(`${API_BASE}/generate-and-publish`, {
@@ -249,30 +322,30 @@ async function startGenerate() {
         });
 
         // 模拟进度更新
-        updateProgress(30, '正在检索相关信息...');
+        updateProgress(taskId, 30, '正在检索相关信息...');
         await sleep(800);
 
-        updateProgress(50, '正在生成文章内容...');
+        updateProgress(taskId, 50, '正在生成文章内容...');
         await sleep(800);
 
-        updateProgress(70, '正在优化内容...');
+        updateProgress(taskId, 70, '正在优化内容...');
         await sleep(800);
 
-        updateProgress(90, '正在发布到小红书...');
+        updateProgress(taskId, 90, '正在发布到小红书...');
 
         const data = await response.json();
 
         if (data.success) {
-            updateProgress(100, '发布成功！');
+            updateProgress(taskId, 100, '发布成功！');
             await sleep(500);
             showResult(data.data);
             showToast('内容生成并发布成功', 'success');
         } else {
-            updateProgress(0, data.error || '生成失败');
+            updateProgress(taskId, 0, data.error || '生成失败');
             showToast(data.error || '生成失败', 'error');
         }
     } catch (error) {
-        updateProgress(0, `操作失败: ${error.message}`);
+        updateProgress(taskId, 0, `操作失败: ${error.message}`);
         showToast(`操作失败：${error.message}`, 'error');
     }
 }

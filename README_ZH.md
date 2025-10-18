@@ -8,7 +8,7 @@
 简单来说：输入一个主题所有 AI 帮你搞定，直接发布到你的小红书账号上
 
 ![img.png](pages/img.png)
-
+![img.png](pages/img_2.png)
 
 ## ✨ 功能特点
 
