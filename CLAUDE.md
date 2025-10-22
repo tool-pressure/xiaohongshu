@@ -128,15 +128,106 @@ if tool_name == "publish_content":
 
 ## Configuration Requirements
 
-Required via web UI (stored in `config/app_config.json`):
-- `llm_api_key`: OpenAI-compatible API key
-- `openai_base_url`: LLM API base URL (e.g., `https://usw.sealos.io/v1`)
-- `default_model`: Model name (recommended: `claude-sonnet-4-20250514`)
+The system now supports multiple LLM API providers with a unified interface:
+
+### Supported Providers
+
+1. **OpenAI** (https://platform.openai.com/)
+   - Base URL: `https://api.openai.com/v1`
+   - Models: gpt-4, gpt-4-turbo, gpt-3.5-turbo, gpt-4o, gpt-4o-mini
+   - API Key: Get from https://platform.openai.com/api-keys
+
+2. **Anthropic (Claude 官方)** (https://www.anthropic.com/)
+   - Base URL: `https://api.anthropic.com/v1`
+   - Models: claude-3-5-sonnet-20241022, claude-3-5-haiku-20241022, claude-3-opus, etc.
+   - API Key: Get from https://console.anthropic.com/settings/keys
+   - **Note**: Fully supported with native Anthropic API
+
+3. **第三方 Claude API** (Third-party Claude Compatible APIs)
+   - Base URL: Custom (e.g., `https://your-proxy.com/v1`, `https://api.example.com/anthropic`)
+   - Models: Same as official Claude models
+   - Use cases:
+     - 🇨🇳 **国内中转服务**: Claude API 中转/代理服务
+     - ☁️ **AWS Bedrock**: Amazon's managed Claude service
+     - 🔧 **自建代理**: Self-hosted Claude API proxy
+     - 🌍 **其他中转**: Any OpenAI-compatible Claude proxy
+   - **Configuration**:
+     - Select "第三方 Claude API" from provider dropdown
+     - Enter your custom Base URL (must be OpenAI-compatible format)
+     - Use official Claude model names (e.g., `claude-3-5-sonnet-20241022`)
+   - **Note**: Must be OpenAI-compatible (function calling support required)
+
+4. **OpenRouter** (https://openrouter.ai/)
+   - Base URL: `https://openrouter.ai/api/v1`
+   - Models: Access 100+ models through unified interface
+   - Recommended models with tool support:
+     - `anthropic/claude-3.5-sonnet`
+     - `openai/gpt-4`
+     - `google/gemini-pro-1.5`
+   - API Key: Get from https://openrouter.ai/keys
+   - **Important**: Free models may not support tool calling (function calling)
+
+5. **Custom** - Any OpenAI-compatible API endpoint
+
+### Web UI Configuration
+
+Via the web interface (http://localhost:8080), you can now:
+1. Select API Provider from dropdown (OpenAI, Anthropic, OpenRouter, Custom)
+2. Choose models from preset list or enter custom model name
+3. Base URL auto-fills for official providers (hidden for OpenAI/Anthropic/OpenRouter)
+4. Model validation tests the selected model before saving
+
+Required fields:
+- `api_provider`: Select from dropdown
+- `llm_api_key`: API key from selected provider
+- `default_model`: Select from dropdown or enter manually
 - `xhs_mcp_url`: Xiaohongshu MCP service URL (default: `http://localhost:18060/mcp`)
 
-Optional:
+Optional fields:
 - `jina_api_key`: For Jina search
 - `tavily_api_key`: For Tavily search (recommended)
+
+### Important Notes
+
+1. **Tool Calling Support**: This system REQUIRES models that support tool/function calling
+   - ✅ Works: Claude 3.5 Sonnet, GPT-4, GPT-4 Turbo
+   - ❌ Won't work: Most free models, basic completion models
+
+2. **OpenRouter Free Models**: Most free models don't support tool calling. If you see error "No endpoints found that support tool use", switch to a paid model.
+
+3. **Anthropic Native Support**: The system now supports Anthropic's API directly (not just through OpenRouter)
+
+### Third-Party Claude API Examples
+
+**国内中转服务示例 (Chinese Proxy Services):**
+```
+Provider: 第三方 Claude API
+Base URL: https://api.your-proxy.com/v1
+API Key: sk-your-proxy-key
+Model: claude-3-5-sonnet-20241022
+```
+
+**AWS Bedrock Claude:**
+```
+Provider: 第三方 Claude API
+Base URL: https://bedrock-runtime.us-east-1.amazonaws.com/v1
+API Key: AWS Access Key configured as Bearer token
+Model: anthropic.claude-3-sonnet-20240229-v1:0
+```
+
+**Self-hosted Proxy:**
+```
+Provider: 第三方 Claude API
+Base URL: http://localhost:8000/v1
+API Key: your-custom-token
+Model: claude-3-5-sonnet-20241022
+```
+
+**Requirements for Third-Party APIs:**
+- Must implement OpenAI-compatible `/chat/completions` endpoint
+- Must support `tools` parameter (function calling)
+- Must return responses in OpenAI format
+- HTTP/HTTPS accessible from your server
 
 ## Important Implementation Notes
 

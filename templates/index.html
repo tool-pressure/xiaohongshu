@@ -28,18 +28,32 @@
                     </div>
                     <div class="panel-body" id="config-panel">
                         <div class="input-group">
-                            <label>LLM API Key <span class="required">*</span></label>
-                            <input type="password" id="llm_api_key" placeholder="输入API密钥">
-                            <a href="https://usw.sealos.io/" target="_blank" class="link-hint">获取密钥</a>
+                            <label>API 提供商 <span class="required">*</span></label>
+                            <select id="api_provider" onchange="updateProviderFields()">
+                                <option value="openai">OpenAI</option>
+                                <option value="anthropic">Anthropic (Claude 官方)</option>
+                                <option value="claude-third-party">第三方 Claude API</option>
+                                <option value="openrouter">OpenRouter</option>
+                                <option value="custom">自定义</option>
+                            </select>
+                            <span class="input-hint" id="provider-hint">💡 使用官方 OpenAI API</span>
                         </div>
                         <div class="input-group">
-                            <label>OpenAI Base URL <span class="required">*</span></label>
-                            <input type="text" id="openai_base_url" placeholder="https://api.openai.com/v1">
+                            <label><span id="api-key-label">API Key</span> <span class="required">*</span></label>
+                            <input type="password" id="llm_api_key" placeholder="输入API密钥" onchange="debounceValidateModel()">
+                            <a href="https://platform.openai.com/api-keys" id="api-key-link" target="_blank" class="link-hint">获取密钥</a>
+                        </div>
+                        <div class="input-group" id="base-url-group">
+                            <label>API Base URL <span class="required">*</span></label>
+                            <input type="text" id="openai_base_url" placeholder="https://api.openai.com/v1" onchange="debounceValidateModel()">
                         </div>
                         <div class="input-group">
                             <label>模型选择 <span class="required">*</span></label>
-                            <input type="text" id="default_model" placeholder="输入模型名称，如：claude-sonnet-4-20250514">
-                            <span class="input-hint">💡 输入模型名称后，系统会自动验证该模型是否可用</span>
+                            <select id="model_select" onchange="handleModelSelect()">
+                                <option value="">选择预设模型或输入自定义模型</option>
+                            </select>
+                            <input type="text" id="default_model" placeholder="输入模型名称" onchange="debounceValidateModel()" style="margin-top: 8px;">
+                            <span class="input-hint">💡 可从下拉框选择预设模型,或直接输入模型名称</span>
                             <span id="model-validation-status" class="validation-status"></span>
                         </div>
                         <div class="input-group">

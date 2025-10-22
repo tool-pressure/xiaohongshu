@@ -6,6 +6,119 @@ let modelValidationTimeout = null;
 // 任务管理 - 重新设计
 let taskCardMap = {}; // { taskId: cardId } 映射任务ID到卡片ID
 
+// API 提供商配置
+const API_PROVIDERS = {
+    openai: {
+        name: 'OpenAI',
+        baseUrl: 'https://api.openai.com/v1',
+        keyUrl: 'https://platform.openai.com/api-keys',
+        hint: '💡 使用官方 OpenAI API',
+        models: ['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo', 'gpt-4o', 'gpt-4o-mini'],
+        showBaseUrl: false
+    },
+    anthropic: {
+        name: 'Anthropic (Claude)',
+        baseUrl: 'https://api.anthropic.com/v1',
+        keyUrl: 'https://console.anthropic.com/settings/keys',
+        hint: '💡 使用官方 Anthropic Claude API',
+        models: ['claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022', 'claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-3-haiku-20240307'],
+        showBaseUrl: false
+    },
+    'claude-third-party': {
+        name: '第三方 Claude API',
+        baseUrl: '',
+        keyUrl: '#',
+        hint: '💡 使用第三方 Claude 兼容 API（如国内中转、AWS Bedrock 等）',
+        models: [
+            'claude-3-5-sonnet-20241022',
+            'claude-3-5-haiku-20241022',
+            'claude-3-opus-20240229',
+            'claude-3-sonnet-20240229',
+            'claude-3-haiku-20240307',
+            'claude-3-7-sonnet-20250219'
+        ],
+        showBaseUrl: true
+    },
+    openrouter: {
+        name: 'OpenRouter',
+        baseUrl: 'https://openrouter.ai/api/v1',
+        keyUrl: 'https://openrouter.ai/keys',
+        hint: '💡 OpenRouter - 统一访问 100+ 模型',
+        models: [
+            'anthropic/claude-3.5-sonnet',
+            'anthropic/claude-3-opus',
+            'openai/gpt-4',
+            'openai/gpt-4-turbo',
+            'google/gemini-pro-1.5',
+            'meta-llama/llama-3.1-70b-instruct',
+            'deepseek/deepseek-chat',
+            'qwen/qwen-2.5-72b-instruct'
+        ],
+        showBaseUrl: false
+    },
+    custom: {
+        name: '自定义',
+        baseUrl: '',
+        keyUrl: '#',
+        hint: '💡 配置自定义 OpenAI 兼容 API',
+        models: [],
+        showBaseUrl: true
+    }
+};
+
+// 更新提供商字段
+function updateProviderFields() {
+    const provider = document.getElementById('api_provider').value;
+    const config = API_PROVIDERS[provider];
+
+    // 更新提示信息
+    document.getElementById('provider-hint').textContent = config.hint;
+
+    // 更新获取密钥链接
+    const keyLink = document.getElementById('api-key-link');
+    keyLink.href = config.keyUrl;
+
+    // 更新 Base URL
+    const baseUrlGroup = document.getElementById('base-url-group');
+    const baseUrlInput = document.getElementById('openai_base_url');
+
+    if (config.showBaseUrl) {
+        baseUrlGroup.style.display = 'block';
+        baseUrlInput.value = baseUrlInput.value || config.baseUrl;
+    } else {
+        baseUrlGroup.style.display = 'none';
+        baseUrlInput.value = config.baseUrl;
+    }
+
+    // 更新模型下拉框
+    const modelSelect = document.getElementById('model_select');
+    modelSelect.innerHTML = '<option value="">选择预设模型或输入自定义模型</option>';
+
+    config.models.forEach(model => {
+        const option = document.createElement('option');
+        option.value = model;
+        option.textContent = model;
+        modelSelect.appendChild(option);
+    });
+
+    // 保存提供商类型到 localStorage
+    localStorage.setItem('api_provider', provider);
+
+    // 清除验证状态
+    document.getElementById('model-validation-status').textContent = '';
+}
+
+// 处理模型选择
+function handleModelSelect() {
+    const modelSelect = document.getElementById('model_select');
+    const modelInput = document.getElementById('default_model');
+
+    if (modelSelect.value) {
+        modelInput.value = modelSelect.value;
+        debounceValidateModel();
+    }
+}
+
 // 折叠面板
 function togglePanel(panelId) {
     const panel = document.getElementById(`${panelId}-panel`);
@@ -98,15 +211,16 @@ function showToast(message, type = 'info') {
 // 保存配置
 async function saveConfig() {
     const config = {
+        api_provider: document.getElementById('api_provider').value,
         llm_api_key: document.getElementById('llm_api_key').value.trim(),
         openai_base_url: document.getElementById('openai_base_url').value.trim(),
-        default_model: document.getElementById('default_model').value,
+        default_model: document.getElementById('default_model').value.trim(),
         jina_api_key: document.getElementById('jina_api_key').value.trim(),
         tavily_api_key: document.getElementById('tavily_api_key').value.trim(),
         xhs_mcp_url: document.getElementById('xhs_mcp_url').value.trim()
     };
 
-    if (!config.llm_api_key || !config.openai_base_url || !config.xhs_mcp_url) {
+    if (!config.llm_api_key || !config.openai_base_url || !config.default_model || !config.xhs_mcp_url) {
         showToast('请填写所有必填字段', 'error');
         return;
     }
@@ -415,10 +529,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const modelInput = document.getElementById('default_model');
     const apiKeyInput = document.getElementById('llm_api_key');
     const baseUrlInput = document.getElementById('openai_base_url');
+    const providerSelect = document.getElementById('api_provider');
 
     if (modelInput) {
         modelInput.addEventListener('input', debounceValidateModel);
         apiKeyInput.addEventListener('input', debounceValidateModel);
         baseUrlInput.addEventListener('input', debounceValidateModel);
     }
+
+    // 从 localStorage 加载提供商设置
+    const savedProvider = localStorage.getItem('api_provider') || 'openai';
+    providerSelect.value = savedProvider;
+    updateProviderFields();
 });

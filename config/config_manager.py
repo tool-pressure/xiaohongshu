@@ -153,7 +153,7 @@ class ConfigManager:
         """
         required_fields = {
             'llm_api_key': 'LLM API Key',
-            'openai_base_url': 'OpenAI Base URL',
+            'openai_base_url': 'API Base URL',
             'default_model': '默认模型',
             'xhs_mcp_url': '小红书MCP服务地址'
         }
@@ -167,7 +167,7 @@ class ConfigManager:
         url_pattern = r'^https?://'
 
         if not re.match(url_pattern, config.get('openai_base_url', '')):
-            return False, "OpenAI Base URL格式不正确"
+            return False, "API Base URL格式不正确"
 
         if not re.match(url_pattern, config.get('xhs_mcp_url', '')):
             return False, "小红书MCP服务地址格式不正确"

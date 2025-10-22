@@ -66,6 +66,7 @@ config_manager = ConfigManager()
 
 # Pydantic 模型
 class ConfigRequest(BaseModel):
+    api_provider: str = "openai"
     llm_api_key: str
     openai_base_url: str
     default_model: str
@@ -103,6 +104,7 @@ async def get_config() -> Dict[str, Any]:
     try:
         config = config_manager.load_config()
         safe_config = {
+            'api_provider': config.get('api_provider', 'openai'),
             'llm_api_key': '***' if config.get('llm_api_key') else '',
             'openai_base_url': config.get('openai_base_url', ''),
             'default_model': config.get('default_model', ''),
