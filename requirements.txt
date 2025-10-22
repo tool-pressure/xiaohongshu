@@ -5,19 +5,19 @@ python-multipart==0.0.12
 jinja2==3.1.4
 
 # OpenAI and LLM
-openai==1.12.0
+openai==1.45.0
 
 # MCP (Model Context Protocol)
 mcp
 
 # Environment variables
-python-dotenv==1.0.0
+python-dotenv==1.0.1
 
 # Async support
 aiohttp==3.9.3
 
 # HTTP requests
-requests==2.31.0
+requests==2.32.0
 
 # Other utilities
 pydantic==2.9.2
