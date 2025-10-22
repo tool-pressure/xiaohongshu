@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Endpoint 测试工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; margin-bottom: 30px; }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .endpoint-list {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .endpoint-item {
+            padding: 8px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .endpoint-item:hover {
+            background: #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 API Endpoint 测试工具</h1>
+
+        <div class="input-group">
+            <label>API 域名/基础地址</label>
+            <input type="text" id="baseUrl" placeholder="例如: https://www.88code.org" value="https://www.88code.org">
+        </div>
+
+        <div class="input-group">
+            <label>API Key</label>
+            <input type="password" id="apiKey" placeholder="输入你的API密钥">
+        </div>
+
+        <div class="input-group">
+            <label>模型名称</label>
+            <input type="text" id="model" placeholder="例如: claude-3-5-sonnet-20241022" value="claude-3-5-sonnet-20241022">
+        </div>
+
+        <div class="endpoint-list">
+            <strong>常见Endpoint模式 (点击测试):</strong>
+            <div class="endpoint-item" onclick="testEndpoint('/v1/chat/completions')">/v1/chat/completions (OpenAI标准)</div>
+            <div class="endpoint-item" onclick="testEndpoint('/chat/completions')">/chat/completions (简化版)</div>
+            <div class="endpoint-item" onclick="testEndpoint('/api/v1/chat/completions')">/api/v1/chat/completions (带api前缀)</div>
+            <div class="endpoint-item" onclick="testEndpoint('/api/chat/completions')">/api/chat/completions (简化api)</div>
+            <div class="endpoint-item" onclick="testEndpoint('/v1/messages')">/v1/messages (Anthropic格式)</div>
+        </div>
+
+        <button onclick="testCustomEndpoint()">自定义测试</button>
+        <input type="text" id="customPath" placeholder="自定义路径,如: /your/custom/path" style="margin-left: 10px; width: 300px;">
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function testEndpoint(path) {
+            const baseUrl = document.getElementById('baseUrl').value.trim().replace(/\/$/, '');
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const model = document.getElementById('model').value.trim();
+            const resultDiv = document.getElementById('result');
+
+            if (!baseUrl || !apiKey) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ 请填写基础地址和API Key';
+                return;
+            }
+
+            const fullUrl = baseUrl + path;
+            resultDiv.className = 'result';
+            resultDiv.textContent = `⏳ 正在测试: ${fullUrl}\n请稍候...`;
+
+            try {
+                const response = await fetch(fullUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: [{ role: 'user', content: 'Hi' }],
+                        max_tokens: 10
+                    })
+                });
+
+                const data = await response.text();
+                let parsedData;
+                try {
+                    parsedData = JSON.parse(data);
+                } catch {
+                    parsedData = data;
+                }
+
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ 成功! 找到正确的endpoint:\n\n` +
+                        `完整URL: ${fullUrl}\n` +
+                        `Base URL配置应为: ${baseUrl}${path.replace('/chat/completions', '').replace('/messages', '')}\n` +
+                        `状态码: ${response.status}\n\n` +
+                        `响应:\n${JSON.stringify(parsedData, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `❌ 失败: ${fullUrl}\n` +
+                        `状态码: ${response.status}\n\n` +
+                        `错误信息:\n${JSON.stringify(parsedData, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ 网络错误: ${fullUrl}\n\n${error.message}\n\n` +
+                    `可能原因:\n` +
+                    `1. CORS跨域限制\n` +
+                    `2. 网络连接问题\n` +
+                    `3. API服务不可用`;
+            }
+        }
+
+        function testCustomEndpoint() {
+            const customPath = document.getElementById('customPath').value.trim();
+            if (!customPath) {
+                alert('请输入自定义路径');
+                return;
+            }
+            testEndpoint(customPath);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>测试第三方 Claude API 选项</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .result { margin-top: 10px; padding: 10px; background: #f5f5f5; }
+        #base-url-group { display: none; margin-top: 15px; }
+        #base-url-group.show { display: block; }
+        input, select { padding: 8px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+    <h1>第三方 Claude API 功能测试</h1>
+
+    <div class="test">
+        <h3>选择 API 提供商：</h3>
+        <select id="api_provider" onchange="updateProvider()">
+            <option value="openai">OpenAI</option>
+            <option value="anthropic">Anthropic (Claude 官方)</option>
+            <option value="claude-third-party">第三方 Claude API</option>
+            <option value="openrouter">OpenRouter</option>
+            <option value="custom">自定义</option>
+        </select>
+
+        <div id="base-url-group">
+            <label>Base URL:</label>
+            <input type="text" id="openai_base_url" placeholder="输入你的 Base URL">
+        </div>
+
+        <div class="result">
+            <strong>当前状态:</strong>
+            <div id="status"></div>
+        </div>
+    </div>
+
+    <script>
+        const PROVIDERS = {
+            'openai': { showBaseUrl: false, baseUrl: 'https://api.openai.com/v1' },
+            'anthropic': { showBaseUrl: false, baseUrl: 'https://api.anthropic.com/v1' },
+            'claude-third-party': { showBaseUrl: true, baseUrl: '' },
+            'openrouter': { showBaseUrl: false, baseUrl: 'https://openrouter.ai/api/v1' },
+            'custom': { showBaseUrl: true, baseUrl: '' }
+        };
+
+        function updateProvider() {
+            const provider = document.getElementById('api_provider').value;
+            const config = PROVIDERS[provider];
+            const baseUrlGroup = document.getElementById('base-url-group');
+            const baseUrlInput = document.getElementById('openai_base_url');
+            const status = document.getElementById('status');
+
+            console.log('Provider:', provider, 'Config:', config);
+
+            if (config.showBaseUrl) {
+                baseUrlGroup.style.display = 'block';
+                baseUrlInput.value = config.baseUrl;
+                status.innerHTML = `✅ Base URL 输入框已显示<br>showBaseUrl: ${config.showBaseUrl}`;
+            } else {
+                baseUrlGroup.style.display = 'none';
+                baseUrlInput.value = config.baseUrl;
+                status.innerHTML = `❌ Base URL 输入框已隐藏<br>showBaseUrl: ${config.showBaseUrl}<br>Auto-filled: ${config.baseUrl}`;
+            }
+        }
+
+        // 初始化
+        updateProvider();
+    </script>
+</body>
+</html>

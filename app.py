@@ -143,6 +143,10 @@ async def save_config(config_data: ConfigRequest) -> Dict[str, Any]:
 async def validate_model(request_data: ValidateModelRequest) -> Dict[str, Any]:
     """验证模型是否可用"""
     try:
+        # 从配置中获取api_provider
+        config = config_manager.load_config()
+        api_provider = config.get('api_provider', 'openai')
+
         llm_api_key = request_data.llm_api_key
         openai_base_url = request_data.openai_base_url
         model_name = request_data.model_name
@@ -152,41 +156,70 @@ async def validate_model(request_data: ValidateModelRequest) -> Dict[str, Any]:
 
         # 尝试调用模型进行验证
         try:
-            import openai
+            from core.llm_adapter import create_llm_adapter
 
-            client = openai.OpenAI(
+            # 创建适配器
+            adapter = create_llm_adapter(
+                api_provider=api_provider,
                 api_key=llm_api_key,
-                base_url=openai_base_url
+                base_url=openai_base_url,
+                model=model_name
             )
 
             # 发送一个简单的测试请求
-            response = client.chat.completions.create(
-                model=model_name,
+            response = adapter.chat_completion(
                 messages=[
                     {"role": "user", "content": "Hi"}
                 ],
-                stream=False
+                temperature=0.5,
+                max_tokens=50
             )
 
-            if response and response.choices:
+            # 检查响应类型
+            if isinstance(response, str):
+                # 检查是否是HTML响应
+                if response.strip().startswith('<'):
+                    raise HTTPException(
+                        status_code=500,
+                        detail=f'API返回了HTML页面而不是JSON响应,请检查Base URL是否正确。常见问题:\n1. Base URL应该以/v1结尾\n2. 确认API服务地址正确\n3. 检查是否需要额外的认证配置'
+                    )
+                raise HTTPException(
+                    status_code=500,
+                    detail=f'API返回了非预期的字符串响应: {response[:200]}'
+                )
+
+            if response and hasattr(response, 'choices') and response.choices:
                 return {
                     'success': True,
                     'message': f'模型 {model_name} 验证成功',
-                    'model': model_name
+                    'model': model_name,
+                    'provider': api_provider
                 }
             else:
                 raise HTTPException(
                     status_code=500,
-                    detail=f'模型 {model_name} 响应异常'
+                    detail=f'模型 {model_name} 响应异常: 没有返回有效的choices'
                 )
 
         except Exception as e:
             error_msg = str(e)
-            # 检查是否是模型不存在的错误
+            logger.error(f"模型验证异常: {error_msg}", exc_info=True)
+
+            # 检查常见错误类型
             if 'model_not_found' in error_msg.lower() or 'does not exist' in error_msg.lower() or 'invalid model' in error_msg.lower():
                 raise HTTPException(
                     status_code=400,
                     detail=f'模型 {model_name} 不存在或不可用'
+                )
+            elif 'authentication' in error_msg.lower() or 'unauthorized' in error_msg.lower() or '401' in error_msg:
+                raise HTTPException(
+                    status_code=401,
+                    detail='API Key无效或未授权,请检查密钥是否正确'
+                )
+            elif 'Invalid URL' in error_msg or 'Connection' in error_msg:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f'无法连接到API服务,请检查Base URL是否正确: {error_msg}'
                 )
             else:
                 raise HTTPException(

@@ -275,12 +275,19 @@ class Tool:
 class LLMClient:
     """Manages communication with the LLM provider."""
 
-    def __init__(self, api_key: str, base_url: str, default_model: str = "claude-sonnet-4-20250514") -> None:
-        self.client = openai.OpenAI(
-            api_key=api_key,
-            base_url=base_url
-        )
+    def __init__(self, api_key: str, base_url: str, default_model: str = "claude-sonnet-4-20250514", api_provider: str = "openai") -> None:
+        from core.llm_adapter import create_llm_adapter
+
         self.default_model = default_model
+        self.api_provider = api_provider
+
+        # 使用适配器支持多种API
+        self.adapter = create_llm_adapter(
+            api_provider=api_provider,
+            api_key=api_key,
+            base_url=base_url,
+            model=default_model
+        )
 
     def get_tool_call_response(self, messages: list[dict[str, str]], tools: list = None, max_tokens: int = 32000):
         """Get a response from the LLM.
@@ -296,13 +303,11 @@ class LLMClient:
             Exception: If the request to the LLM fails.
         """
         try:
-            response = self.client.chat.completions.create(
-                model=self.default_model,
+            response = self.adapter.chat_completion(
                 messages=messages,
                 tools=tools,
                 tool_choice="auto" if tools else None,
                 temperature=0.8,
-                # max_tokens=max_tokens
             )
             return response
 
@@ -371,13 +376,11 @@ class LLMClient:
                 "content": summary_prompt
             })
             
-            response = self.client.chat.completions.create(
-                model=self.default_model,
+            response = self.adapter.chat_completion(
                 messages=enhanced_messages,
                 tools=tools,  # Allow tools for continuation if needed
                 tool_choice="auto" if tools else None,
                 temperature=0.3,  # Lower temperature for more focused response
-                # max_tokens=max_tokens
             )
             return response
 

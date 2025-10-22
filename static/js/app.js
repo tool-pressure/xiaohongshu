@@ -71,6 +71,13 @@ function updateProviderFields() {
     const provider = document.getElementById('api_provider').value;
     const config = API_PROVIDERS[provider];
 
+    if (!config) {
+        console.error('Unknown provider:', provider);
+        return;
+    }
+
+    console.log('Updating provider fields for:', provider, 'showBaseUrl:', config.showBaseUrl);
+
     // 更新提示信息
     document.getElementById('provider-hint').textContent = config.hint;
 
@@ -82,10 +89,20 @@ function updateProviderFields() {
     const baseUrlGroup = document.getElementById('base-url-group');
     const baseUrlInput = document.getElementById('openai_base_url');
 
+    if (!baseUrlGroup) {
+        console.error('base-url-group element not found');
+        return;
+    }
+
     if (config.showBaseUrl) {
+        console.log('Showing Base URL input');
         baseUrlGroup.style.display = 'block';
-        baseUrlInput.value = baseUrlInput.value || config.baseUrl;
+        // 只有当 input 为空时才设置默认值
+        if (!baseUrlInput.value || baseUrlInput.value === config.baseUrl) {
+            baseUrlInput.value = config.baseUrl;
+        }
     } else {
+        console.log('Hiding Base URL input, setting to:', config.baseUrl);
         baseUrlGroup.style.display = 'none';
         baseUrlInput.value = config.baseUrl;
     }
@@ -538,7 +555,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 从 localStorage 加载提供商设置
-    const savedProvider = localStorage.getItem('api_provider') || 'openai';
-    providerSelect.value = savedProvider;
+    const savedProvider = localStorage.getItem('api_provider');
+    if (savedProvider && API_PROVIDERS[savedProvider]) {
+        providerSelect.value = savedProvider;
+    }
+
+    // 初始化提供商字段（确保正确显示/隐藏 Base URL）
     updateProviderFields();
 });

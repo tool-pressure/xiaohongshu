@@ -178,7 +178,8 @@ class ContentGenerator:
             self.llm_client = LLMClient(
                 self.config.get('llm_api_key'),
                 self.config.get('openai_base_url'),
-                self.config.get('default_model', 'claude-sonnet-4-20250514')
+                self.config.get('default_model', 'claude-sonnet-4-20250514'),
+                self.config.get('api_provider', 'openai')  # 传递API提供商类型
             )
 
             # 初始化所有服务器
